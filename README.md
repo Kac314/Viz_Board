@@ -7,7 +7,8 @@ This portfolio was created to showcase code samples related to data analysis for
 
 ### 1. Basic SQL
 File contains basic sql functions. Just very simple code snippets to show formatting habits.
-All data come from NBA database, [download it here] (https://www.kaggle.com/datasets/wyattowalsh/basketball)
+
+All data come from NBA database, [download it here](https://www.kaggle.com/datasets/wyattowalsh/basketball)
 Functions used:
 - SELECT
 - FILTERING
@@ -18,7 +19,10 @@ Functions used:
 
 ### 2. Advanced SQL
 Showcasing more advanced SQL concepts, helpful with advanced cases or crafted for very specific business cases.
-Code in this file might not work in simpler databases, for example SQLite doesn't have GROUPING SETS, but should work fine on all advanced engines, like Oracle or Snowflake.
+
+Code in this file might not work in simpler databases, for example SQLite doesn't have GROUPING SETS, 
+
+but should work fine on all advanced engines, like Oracle or Snowflake.
 
 Solutions in file:
 - Creation of VIEW
