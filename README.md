@@ -6,7 +6,7 @@ This portfolio was created to showcase code samples related to data analysis for
 ## Files
 
 ### 1. Basic SQL
-File contains basic sql functions. Just very simple code snippets to show formatting habits.
+File contains basic sql functions. Simple code snippets demonstrating SQL formatting best practices.
 
 All data come from NBA database, [download it here](https://www.kaggle.com/datasets/wyattowalsh/basketball)
 Functions used:
