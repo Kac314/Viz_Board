@@ -1,0 +1,125 @@
+-- Basic functionalities (I)
+-- Querying table
+
+SELECT 
+    full_name, 
+    city, 
+    year_founded
+FROM
+    team;
+
+-- Basic functionalities (II)
+-- Filtering 
+
+SELECT 
+    full_name, 
+    city, 
+    year_founded
+FROM
+    team
+WHERE
+    1 = 1 AND -- It is always true, so it doesn't impact query cost, yet it is quite useful for debugging
+    year_founded  = 1966;
+    
+-- Basic functionalities (III)
+-- Implementing logic in filters
+
+SELECT 
+    full_name, 
+    city, 
+    year_founded
+FROM
+    team 
+WHERE
+    1 = 1 AND 
+    (team.year_founded  = 1966 OR 
+    team.city = 'New York');
+    
+-- Basic functionalities (IV)
+-- Joins
+
+SELECT 
+    team.full_name, 
+    team.city, 
+    team.year_founded,
+    team_details.owner, 
+    team_details.headcoach
+FROM
+    team 
+LEFT JOIN 
+    team_details ON team.id = team_details.team_id
+WHERE
+    1 = 1 AND 
+    (team.year_founded  = 1966 OR 
+    team.city = 'New York');
+
+-- Basic functionalities (V)
+-- Aliasing
+
+SELECT 
+    t.full_name AS Name, -- It is possible to alias columns which would change column name in query result, 
+    t.city, 
+    t.year_founded,
+    td.owner, 
+    td.headcoach
+FROM
+    team AS t -- As well as tables name. This one is mostly for developers' convenience
+LEFT JOIN 
+    team_details AS td ON t.id = td.team_id
+WHERE
+    1 = 1 AND 
+    (t.year_founded  = 1966 OR 
+    t.city = 'New York');
+
+-- Basic functionalities (VI)
+-- Aggragate functions
+-- Showing some basic statistics for home games
+
+SELECT 
+    t.full_name AS Name, 
+    ROUND(AVG(ls.pts_home),2) AS avg_pts_scored, 
+    SUM(ls.pts_home) AS total_pts_scored,
+    MAX(ls.pts_home) AS max_pts_scored,
+    MIN(ls.pts_home) AS min_pts_scored,
+    COUNT(distinct g.game_id) AS no_of_games,
+    COUNT(distinct season_id) AS seasons_played,
+    ROUND(SUM(ls.pts_home)/COUNT(distinct season_id),2) AS avg_pts_per_season
+    
+FROM
+    team AS t 
+LEFT JOIN
+    game AS g ON t.id = g.team_id_home
+LEFT JOIN 
+    line_score AS ls ON g.game_id = ls.game_id
+WHERE
+    1 = 1 AND 
+    (t.year_founded  = 1966 OR
+    t.city = 'New York')
+GROUP BY 
+t.full_name;    
+
+-- Basic functionalities (VII)
+-- A little bit more complex exercise: 
+-- Find average pts scored and games won for at home and away games of Chicago Bulls per season, excluding play-offs
+-- Include games with more than 20 pts in first q
+SELECT
+    g.season_id AS season,
+    SUM(
+        CASE WHEN g.wl_home = 'W' AND g.team_name_home = 'Chicago Bulls' THEN 1 ELSE 0 END) AS home_wins,
+    SUM(
+        CASE WHEN g.wl_away = 'W' AND g.team_name_away = 'Chicago Bulls' THEN 1 ELSE 0 END) AS away_wins,
+    ROUND(AVG(CASE WHEN g.team_name_home = 'Chicago Bulls' THEN g.pts_home END),2) AS home_avg_pts, 
+    ROUND(AVG(CASE WHEN g.team_name_away = 'Chicago Bulls' THEN g.pts_away END),2) AS away_avg_pts
+FROM 
+    game g 
+JOIN 
+    line_score ls ON ls.game_id = g.game_id
+WHERE
+    1=1 AND 
+    (g.team_name_home = 'Chicago Bulls' OR 
+    g.team_name_away = 'Chicago Bulls') AND
+    g.season_type = 'Regular Season' AND 
+    (ls.pts_qtr1_home + ls.pts_qtr1_away) > 20
+GROUP BY 
+    season_id;
+
