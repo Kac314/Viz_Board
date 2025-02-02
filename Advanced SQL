@@ -1,0 +1,101 @@
+-- Advanced SQL functions (I)
+-- Removing duplicates from query results using window function
+
+-- Step one: Create View with duplicated values
+
+CREATE VIEW duplic_players AS
+SELECT
+    id,
+    full_name, 
+    is_active
+FROM 
+    player
+    
+UNION ALL -- I want to keep duplicates
+
+SELECT
+    id,
+    full_name, 
+    is_active
+FROM 
+    player
+WHERE 
+    id > 7800; -- random number, to create some duplicates
+    
+;
+-- Step Two: Find duplicated rows in duplic_players
+
+WITH row_no AS ( -- Using CTE for generating row numbers 
+SELECT
+    id,
+    full_name, 
+    is_active,
+    ROW_NUMBER() OVER ( PARTITION BY id) AS rownumber
+FROM 
+    duplic_players)
+    
+SELECT -- Querying row_no (CTE)
+    id, 
+    full_name,
+    is_active
+FROM 
+    row_no
+WHERE
+    rownumber = 1;
+    
+-- Advanced SQL functions (II)
+-- Implementing multiple groupings
+
+SELECT 
+    YEAR(g.game_date) as game_year,
+    g.season_type,
+    SUM(CASE WHEN g.team_name_home = 'Chicago Bulls' THEN pts_home 
+        WHEN g.team_name_away = 'Chicago Bulls' THEN pts_away
+        ELSE 0 END) as pts
+    
+FROM
+    team AS t
+LEFT JOIN game g ON g.team_name_home = t.full_name OR g.team_name_away = t.full_name
+WHERE
+    1=1 AND    
+    t.full_name = 'Chicago Bulls' AND
+    YEAR(game_date) IN (1998, 1997)
+GROUP BY
+    GROUPING SETS (
+        (),
+        (YEAR(g.game_date)),
+        (YEAR(g.game_date), g.season_type))
+ORDER BY 
+    YEAR(g.game_date) NULLS FIRST,
+    g.season_type NULLS FIRST;
+
+
+-- Advanced SQL functions (III)
+-- Pivoting data
+-- Scenario: Find SUM of points for home game for each of listed teams for regular sesons 1990-1999
+-- Teams: Chicago Bulls, New York Knicks, Boston Celtics, Los Angeles Lakers
+
+SELECT 
+    season_id,
+    full_name, 
+    pts_home
+FROM 
+    (
+    SELECT
+        g.season_id, 
+        t.full_name, 
+        g.pts_home
+    FROM   
+        game g
+    LEFT JOIN 
+        team t ON g.team_id_home = t.id
+    WHERE 
+        1 = 1 AND
+        t.full_name IN ('Chicago Bulls', 'Boston Celtics', 'New York Knicks', 'Los Angeles Lakers') AND
+        season_id BETWEEN 21990 AND 21999
+    )
+    
+PIVOT
+    (SUM(pts_home) FOR full_name IN (ANY))
+ORDER BY 
+    season_id ASC
